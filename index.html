@@ -1411,6 +1411,9 @@
     let wrongBank = saved.wrongBank || [];
     let reviewMode = saved.reviewMode || false;
 
+    let currentChoiceOrder = [];
+
+
     function persist(){ localStorage.setItem(KEY, JSON.stringify({ order, idx, score, best, wrongBank, reviewMode })); }
     function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
     function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
@@ -1428,49 +1431,66 @@
       render();
     }
 
-    function render(){
-      const seq = reviewMode ? wrongBank : order;
-      const total = seq.length || 1;
-      const cardIndex = seq.length ? seq[idx % seq.length] : order[0];
-      const card = CARDS[cardIndex];
+ function render(){
+  const seq = reviewMode ? wrongBank : order;
+  const total = seq.length || 1;
+  const cardIndex = seq.length ? seq[idx % seq.length] : order[0];
+  const card = CARDS[cardIndex];
 
-      progressEl.textContent = `Q ${Math.min(idx+1, total)} / ${total}`;
-      barEl.style.width = `${((idx)/Math.max(total-1,1))*100}%`;
-      scoreEl.textContent = `Score: ${score}${best ? ` (Best: ${best})` : ""}`;
-      qEl.textContent = card.q;
+  progressEl.textContent = `Q ${Math.min(idx+1, total)} / ${total}`;
+  barEl.style.width = `${((idx)/Math.max(total-1,1))*100}%`;
+  scoreEl.textContent = `Score: ${score}${best ? ` (Best: ${best})` : ""}`;
+  qEl.textContent = card.q;
 
-      listEl.innerHTML = "";
-      hintText.hidden = true;
-      hintText.textContent = card.hint || "No hint for this card.";
+  // NEW: shuffle choice order for this render
+  currentChoiceOrder = shuffle(card.choices.map((_, i) => i));
 
-      card.choices.forEach((c, i) => {
-        const li = document.createElement("li");
-        li.className = "choice";
-        li.setAttribute("role", "option");
-        li.tabIndex = 0;
-        li.dataset.index = i;
-        li.innerHTML = `<span class="index">${i+1}.</span> ${c}`;
-        li.addEventListener("click", () => check(i, cardIndex));
-        li.addEventListener("keydown", (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); check(i, cardIndex);} });
-        listEl.appendChild(li);
-      });
+  listEl.innerHTML = "";
+  hintText.hidden = true;
+  hintText.textContent = card.hint || "No hint for this card.";
 
-      nextBtn.disabled = true;
-      persist();
-    }
+  currentChoiceOrder.forEach((origIdx, pos) => {
+    const li = document.createElement("li");
+    li.className = "choice";
+    li.setAttribute("role","option");
+    li.tabIndex = 0;
+    li.dataset.idxOriginal = String(origIdx);
+    li.innerHTML = `<span class="index">${pos+1}.</span> ${card.choices[origIdx]}`;
+    li.addEventListener("click", () => check(origIdx, cardIndex));
+    li.addEventListener("keydown", (e) => {
+      if(e.key==="Enter" || e.key===" "){ e.preventDefault(); check(origIdx, cardIndex); }
+    });
+    listEl.appendChild(li);
+  });
 
-    function check(choice, cardIndex){
-      if([...listEl.children].some(li => li.classList.contains("correct")||li.classList.contains("incorrect"))) return;
-      const card = CARDS[cardIndex];
-      [...listEl.children].forEach((li, i) => {
-        li.classList.toggle("correct", i === card.correct);
-        if(i===choice && choice!==card.correct) li.classList.add("incorrect");
-      });
-      if(choice===card.correct){ score++; } else { if(!wrongBank.includes(cardIndex)) wrongBank.push(cardIndex); }
-      if(score>best) best = score;
-      nextBtn.disabled = false;
-      persist();
-    }
+  nextBtn.disabled = true;
+  persist();
+}
+
+
+   function check(selectedOriginalIdx, cardIndex){
+  // prevent double-marking
+  if([...listEl.children].some(li => li.classList.contains("correct") || li.classList.contains("incorrect"))) return;
+
+  const card = CARDS[cardIndex];
+  [...listEl.children].forEach(li => {
+    const orig = Number(li.dataset.idxOriginal);
+    // mark the true correct choice
+    if (orig === card.correct) li.classList.add("correct");
+    // mark the chosen one wrong if needed
+    if (orig === selectedOriginalIdx && selectedOriginalIdx !== card.correct) li.classList.add("incorrect");
+  });
+
+  if (selectedOriginalIdx === card.correct) {
+    score++;
+  } else {
+    if (!wrongBank.includes(cardIndex)) wrongBank.push(cardIndex);
+  }
+  if (score > best) best = score;
+  nextBtn.disabled = false;
+  persist();
+}
+
 
     function next(){
       const seq = reviewMode ? wrongBank : order;
@@ -1494,11 +1514,17 @@
     reviewBtn.addEventListener("click", toggleReview);
 
     window.addEventListener("keydown", (e)=>{
-      if(e.key>="1" && e.key<="4"){ const i = Number(e.key)-1; const seq = reviewMode ? wrongBank : order; const cardIndex = seq.length ? seq[idx % seq.length] : order[0]; check(i, cardIndex); }
-      if(e.key.toLowerCase()==="h") hintBtn.click();
-      if(e.key.toLowerCase()==="n") nextBtn.click();
-      if(e.key.toLowerCase()==="r") reviewBtn.click();
-    });
+  if(e.key >= "1" && e.key <= "4"){
+    const pos = Number(e.key) - 1;                // displayed position
+    const selectedOriginalIdx = currentChoiceOrder[pos]; // map to original index
+    const seq = reviewMode ? wrongBank : order;
+    const cardIndex = seq.length ? seq[idx % seq.length] : order[0];
+    if (selectedOriginalIdx !== undefined) check(selectedOriginalIdx, cardIndex);
+  }
+  if(e.key.toLowerCase()==="h") hintBtn.click();
+  if(e.key.toLowerCase()==="n") nextBtn.click();
+  if(e.key.toLowerCase()==="r") reviewBtn.click();
+});
 
     loadCards();
   </script>
