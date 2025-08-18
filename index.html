@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Electronics Flashcards</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>⚡ Electronics Flashcards</h1>
+      <div class="sub">Focus: devices, tubes, and semiconductor basics</div>
+    </header>
+
+    <section class="card" role="region" aria-live="polite">
+      <div class="meta">
+        <div id="progress">Q 1 / 12</div>
+        <div id="score">Score: 0</div>
+      </div>
+
+      <h2 id="question" class="question">Loading…</h2>
+
+      <ol id="choices" class="choices" role="listbox" aria-label="Answer choices">
+        <!-- choices injected by JS -->
+      </ol>
+
+      <div class="hint-row">
+        <button id="hintBtn" class="btn ghost" aria-controls="hintText" aria-expanded="false">Show hint (H)</button>
+        <div id="hintText" class="hint" hidden>Hint goes here</div>
+      </div>
+
+      <div class="controls">
+        <button id="nextBtn" class="btn primary">Next (N)</button>
+        <button id="reviewBtn" class="btn">Review wrong (R)</button>
+        <button id="restartBtn" class="btn danger">Restart</button>
+      </div>
+
+      <details class="tiny">
+        <summary>Keyboard help</summary>
+        <ul>
+          <li>1–4: select an answer</li>
+          <li>H: show/hide hint</li>
+          <li>N: next</li>
+          <li>R: review wrong answers</li>
+        </ul>
+      </details>
+    </section>
+
+    <footer class="footer">
+      <span>Progress and best score are saved locally.</span>
+    </footer>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
