@@ -3,125 +3,148 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Electronics Flashcards – Topics</title>
+  <meta name="theme-color" content="#0a77d5" />
   <link rel="icon" href="favicon.ico" sizes="any">
-<meta name="theme-color" content="#0a77d5">
-
-  <title>Electronics Flashcards</title>
   <style>
     :root{
-      --bg: #f6fbff;
-      --card: #ffffff;
-      --ink: #13213a;
-      --muted: #5a6a85;
-      --brand: #0a77d5;
-      --brand-2: #0e63ad;
-      --ok: #17a34a;
-      --bad: #e23d3d;
-      --ring: rgba(10,119,213,0.25);
+      --bg: #f6fbff; --card:#fff; --ink:#13213a; --muted:#5a6a85;
+      --brand:#0a77d5; --brand-2:#0e63ad; --ring: rgba(10,119,213,.25);
+      --ok:#17a34a; --bad:#e23d3d;
     }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      color: var(--ink);
-      background: radial-gradient(1200px 600px at 10% -20%, #e7f5ff, transparent) var(--bg);
-      font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;color:var(--ink);background: radial-gradient(1200px 600px at 10% -20%, #e7f5ff, transparent) var(--bg);
+      font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+    .container{max-width:1100px;margin:24px auto;padding:0 16px}
+    header{ text-align:center; margin-bottom:18px; }
+    header h1{ margin:0; font-size:clamp(1.25rem,2.6vw,2rem); color:var(--brand-2); }
+    header .sub{ color:var(--muted); }
 
-    .app { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+    .cards{ display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
+    .card{ background:var(--card); border-radius:16px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+    .card h3{ margin:0 0 8px; font-size:1.05rem; }
+    .muted{ color:var(--muted); }
 
-    .header { text-align: center; margin-bottom: 14px; }
-    .header h1 { margin: 0; font-size: clamp(1.25rem, 2.4vw, 2rem); color: var(--brand-2); }
-    .sub { color: var(--muted); font-size: .95rem; margin-top: 4px; }
+    .tagbar{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 2px; }
+    .tag{ padding:8px 12px; border-radius:999px; border:1px solid #d7e7f7; background:#fff; color:var(--ink); cursor:pointer; font-weight:600; }
+    .tag.active{ background: linear-gradient(145deg, var(--brand), var(--brand-2)); color:#fff; border:none; }
+    .tag small{ opacity:.85; margin-left:6px; }
 
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.08);
-    }
+    .btnrow{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:14px 0; }
+    .btn{ border:1px solid #d7e7f7; background:#fff; color:var(--ink); padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600; }
+    .btn:hover{ transform:translateY(-1px) }
+    .btn:focus-visible{ box-shadow:0 0 0 4px var(--ring); outline:none; }
+    .primary{ background:linear-gradient(145deg,var(--brand),var(--brand-2)); color:#fff; border:none; }
+    .ghost{ background:#f3f8fe; }
 
-    .meta { display: flex; justify-content: space-between; color: var(--muted); font-size: .95rem; margin-bottom: 10px; }
-
-    .progressbar { height: 8px; background: #eaf3fb; border-radius: 999px; overflow: hidden; margin: 8px 0 14px; }
-    .progressbar > i { display:block; height:100%; width:0%; background: linear-gradient(145deg, var(--brand), var(--brand-2)); transition: width .25s ease; }
-
-    .question { margin: 6px 0 12px; font-size: clamp(1.05rem, 2vw, 1.35rem); }
-
-    .choices { padding: 0; margin: 0 0 8px; list-style: none; display: grid; gap: 10px; }
-    .choice { border: 1px solid #e6eef7; border-radius: 12px; padding: 12px 14px; cursor: pointer; transition: transform .04s ease, box-shadow .1s ease, border-color .2s ease; background:#fff; outline: none; }
-    .choice:hover { transform: translateY(-1px); }
-    .choice:focus-visible { box-shadow: 0 0 0 4px var(--ring); border-color: var(--brand); }
-    .choice.correct { border-color: rgba(23,163,74,.55); background: #f1fcf5; }
-    .choice.incorrect { border-color: rgba(226,61,61,.55); background: #fff5f5; }
-
-    .hint-row { display: flex; gap: 10px; align-items: center; margin: 8px 0 12px; }
-    .hint { color: var(--muted); background: #f7fbff; border: 1px dashed #cfe8ff; border-radius: 10px; padding: 8px 10px; }
-
-    .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
-    .btn { border: 1px solid #d7e7f7; background: #fff; color: var(--ink); padding: 10px 14px; border-radius: 12px; cursor: pointer; font-weight: 600; }
-    .btn:hover { transform: translateY(-1px); }
-    .btn:focus-visible { box-shadow: 0 0 0 4px var(--ring); outline: none; }
-    .btn.primary { background: linear-gradient(145deg, var(--brand), var(--brand-2)); color: #fff; border: none; }
-    .btn.ghost { background: #f3f8fe; }
-    .btn.danger { border-color: #ffd6d6; }
-
-    .tiny { margin-top: 12px; color: var(--muted); font-size: .9rem; }
-    .footer { text-align: center; color: var(--muted); margin: 14px 0; font-size: .9rem; }
+    /* Quiz view */
+    .quiz{ display:none; }
+    .progress{ display:flex; justify-content:space-between; color:var(--muted); font-size:.95rem; margin-bottom:10px; }
+    .progressbar{ height:8px; background:#eaf3fb; border-radius:999px; overflow:hidden; margin:8px 0 14px; }
+    .progressbar>i{ display:block; height:100%; width:0%; background:linear-gradient(145deg,var(--brand),var(--brand-2)); transition:width .25s ease; }
+    .question{ margin: 6px 0 12px; font-size: clamp(1.05rem, 2vw, 1.35rem); }
+    .choices{ padding:0; margin:0 0 8px; list-style:none; display:grid; gap:10px; }
+    .choice{ border:1px solid #e6eef7; border-radius:12px; padding:12px 14px; cursor:pointer; transition: transform .04s ease, box-shadow .1s ease, border-color .2s ease; background:#fff; outline:none; }
+    .choice:hover{ transform:translateY(-1px) }
+    .choice:focus-visible{ box-shadow:0 0 0 4px var(--ring); border-color:var(--brand); }
+    .choice.correct{ border-color:rgba(23,163,74,.55); background:#f1fcf5; }
+    .choice.incorrect{ border-color:rgba(226,61,61,.55); background:#fff5f5; }
+    .hintrow{ display:flex; gap:10px; align-items:center; margin:8px 0 12px; }
+    .hint{ color:var(--muted); background:#f7fbff; border:1px dashed #cfe8ff; border-radius:10px; padding:8px 10px; }
+    .footer{ text-align:center; color:var(--muted); margin: 14px 0; font-size:.9rem; }
   </style>
 </head>
 <body>
-  <main class="app">
-    <header class="header">
-      <h1>⚡ Electronics Flashcards</h1>
-      <div class="sub">Quiz</div>
+  <div class="container">
+    <header>
+      <h1>⚡ Electronics Flashcards — Choose Topics</h1>
+      <div class="sub">Pick one or more topics, then start practicing. Keyboard in quiz: 1–4, H, N, R.</div>
     </header>
 
-    <section class="card" role="region" aria-live="polite">
-      <div class="meta">
-        <div id="progress">Q 1 / 4</div>
+    <section class="card">
+      <h3>Topics</h3>
+      <div id="tagbar" class="tagbar" aria-label="Topic filter"></div>
+      <div class="btnrow">
+        <button id="startBtn" class="btn primary">Start studying</button>
+        <button id="selectAllBtn" class="btn ghost">Select all</button>
+        <button id="clearBtn" class="btn">Clear</button>
+      </div>
+      <p class="muted" id="selInfo">No topics selected yet.</p>
+    </section>
+
+    <section id="quiz" class="card quiz" role="region" aria-live="polite">
+      <div class="progress">
+        <div id="ptext">Q 1 / 1</div>
         <div id="score">Score: 0</div>
       </div>
       <div class="progressbar" aria-hidden="true"><i id="bar" style="width:0%"></i></div>
-
       <h2 id="question" class="question">Loading…</h2>
-
       <ol id="choices" class="choices" role="listbox" aria-label="Answer choices"></ol>
-
-      <div class="hint-row">
+      <div class="hintrow">
         <button id="hintBtn" class="btn ghost" aria-controls="hintText" aria-expanded="false">Show hint (H)</button>
         <div id="hintText" class="hint" hidden>Hint goes here</div>
       </div>
-
-      <div class="controls">
+      <div class="btnrow">
         <button id="nextBtn" class="btn primary">Next (N)</button>
         <button id="reviewBtn" class="btn">Review wrong (R)</button>
-        <button id="restartBtn" class="btn danger">Restart</button>
+        <button id="restartBtn" class="btn">Restart</button>
+        <button id="backBtn" class="btn">Back to topics</button>
       </div>
-
-      <details class="tiny">
-        <summary>Keyboard help</summary>
-        <ul>
-          <li>1–4: select an answer</li>
-          <li>H: show/hide hint</li>
-          <li>N: next</li>
-          <li>R: review wrong answers</li>
-        </ul>
-      </details>
     </section>
 
-    <footer class="footer">
-      <span>Progress & best score saved locally.</span>
-    </footer>
-  </main>
+    <footer class="footer">Progress & best score saved locally per topic set.</footer>
+  </div>
 
-  <script>
-    // ===== Demo-matching dataset loader =====
-    // Option 1: provide an external /cards.json with the format below.
-    // Option 2: the inline DEFAULT_CARDS will be used.
-    const DEFAULT_CARDS = [
+<script>
+  const KEY = "flashcards-topics-v1";
+  const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+  let selectedTags = new Set(saved.selectedTags || []);
+
+  // Quiz state
+  let CARDS = [];
+  let FILTERED = [];
+  let order = [];
+  let idx = 0;
+  let score = 0, best = saved.best || 0;
+  let wrongBank = [];
+  let reviewMode = false;
+  let currentChoiceOrder = [];
+
+  // UI refs
+  const tagbar = document.getElementById('tagbar');
+  const selInfo = document.getElementById('selInfo');
+  const startBtn = document.getElementById('startBtn');
+  const selectAllBtn = document.getElementById('selectAllBtn');
+  const clearBtn = document.getElementById('clearBtn');
+
+  const quiz = document.getElementById('quiz');
+  const ptext = document.getElementById('ptext');
+  const scoreEl = document.getElementById('score');
+  const bar = document.getElementById('bar');
+  const qEl = document.getElementById('question');
+  const listEl = document.getElementById('choices');
+  const hintBtn = document.getElementById('hintBtn');
+  const hintText = document.getElementById('hintText');
+  const nextBtn = document.getElementById('nextBtn');
+  const reviewBtn = document.getElementById('reviewBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const backBtn = document.getElementById('backBtn');
+
+  function persist(){
+    localStorage.setItem(KEY, JSON.stringify({selectedTags: Array.from(selectedTags), best}));
+  }
+  function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+  async function load(){
+    let data;
+    try{
+      const r = await fetch('cards.json', {cache:'no-store'});
+      if(!r.ok) throw new Error('no cards.json');
+      data = await r.json();
+    }catch(e){
+      data = [
   {
     "q": "What are the three main atomic particles?",
     "choices": [
@@ -131,7 +154,10 @@
       "Quark, gluon, boson"
     ],
     "correct": 0,
-    "hint": "Think basic chemistry building blocks."
+    "hint": "Think basic chemistry building blocks.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Proton’s electric charge is",
@@ -142,7 +168,10 @@
       "+3.2×10^-19 C"
     ],
     "correct": 0,
-    "hint": "Equal magnitude to electron, opposite sign."
+    "hint": "Equal magnitude to electron, opposite sign.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Electron’s charge is",
@@ -153,7 +182,10 @@
       "-3.2×10^-19 C"
     ],
     "correct": 0,
-    "hint": "Negative of the proton."
+    "hint": "Negative of the proton.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Electron’s mass (kg) in the table is",
@@ -164,7 +196,10 @@
       "9.11×10^-28"
     ],
     "correct": 0,
-    "hint": "About 1/1836 of a proton."
+    "hint": "About 1/1836 of a proton.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Proton’s mass (kg) listed is",
@@ -175,7 +210,10 @@
       "3.0×10^-29"
     ],
     "correct": 0,
-    "hint": "Much heavier than an electron."
+    "hint": "Much heavier than an electron.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Neutron’s listed charge is",
@@ -186,7 +224,10 @@
       "+3.2×10^-19 C"
     ],
     "correct": 0,
-    "hint": "Neutral by name."
+    "hint": "Neutral by name.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Who discovered the electron?",
@@ -197,7 +238,11 @@
       "Niels Bohr"
     ],
     "correct": 0,
-    "hint": "Cathode rays experiments."
+    "hint": "Cathode rays experiments.",
+    "tags": [
+      "Atomic structure",
+      "History & discoveries"
+    ]
   },
   {
     "q": "Who identified the proton (1917)?",
@@ -208,7 +253,11 @@
       "Robert Millikan"
     ],
     "correct": 0,
-    "hint": "Gold-foil fame too."
+    "hint": "Gold-foil fame too.",
+    "tags": [
+      "Atomic structure",
+      "History & discoveries"
+    ]
   },
   {
     "q": "Who discovered the neutron (1932)?",
@@ -219,7 +268,11 @@
       "Paul Dirac"
     ],
     "correct": 0,
-    "hint": "Neutral nucleus component."
+    "hint": "Neutral nucleus component.",
+    "tags": [
+      "Atomic structure",
+      "History & discoveries"
+    ]
   },
   {
     "q": "Where is most atomic mass located?",
@@ -230,7 +283,10 @@
       "Outer shell"
     ],
     "correct": 0,
-    "hint": "Dense central region."
+    "hint": "Dense central region.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Atoms typically have equal numbers of",
@@ -241,7 +297,10 @@
       "Valence and core electrons"
     ],
     "correct": 0,
-    "hint": "Charge neutrality."
+    "hint": "Charge neutrality.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Adding a proton to an atom makes",
@@ -252,7 +311,10 @@
       "An ion"
     ],
     "correct": 0,
-    "hint": "Atomic number defines element."
+    "hint": "Atomic number defines element.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Adding a neutron makes",
@@ -263,7 +325,10 @@
       "A molecule"
     ],
     "correct": 0,
-    "hint": "Same element, different mass."
+    "hint": "Same element, different mass.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Valence electrons are found in the",
@@ -274,7 +339,11 @@
       "Conduction band only"
     ],
     "correct": 0,
-    "hint": "They determine bonding."
+    "hint": "They determine bonding.",
+    "tags": [
+      "Atomic structure",
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Conductors typically have",
@@ -285,7 +354,10 @@
       "No valence electrons"
     ],
     "correct": 0,
-    "hint": "Copper is a model case."
+    "hint": "Copper is a model case.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Insulators usually have",
@@ -296,7 +368,10 @@
       "2 valence electrons"
     ],
     "correct": 0,
-    "hint": "Outer shell is full or nearly full."
+    "hint": "Outer shell is full or nearly full.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Semiconductors like Si, Ge have",
@@ -307,7 +382,10 @@
       "3 valence electrons"
     ],
     "correct": 0,
-    "hint": "Between conductor and insulator."
+    "hint": "Between conductor and insulator.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Example of a conductor",
@@ -318,7 +396,10 @@
       "Dry air"
     ],
     "correct": 0,
-    "hint": "Used for wires."
+    "hint": "Used for wires.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Example of an insulator",
@@ -329,7 +410,10 @@
       "Silicon"
     ],
     "correct": 0,
-    "hint": "Protective cable jackets."
+    "hint": "Protective cable jackets.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Electrons are easy to strip because",
@@ -340,7 +424,10 @@
       "They have no mass"
     ],
     "correct": 0,
-    "hint": "Small mass, outer shells."
+    "hint": "Small mass, outer shells.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Vacuum tubes control the flow of",
@@ -351,7 +438,10 @@
       "Ions in liquid"
     ],
     "correct": 0,
-    "hint": "Also called electron tubes."
+    "hint": "Also called electron tubes.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Tube type that rectifies",
@@ -362,7 +452,10 @@
       "Phototube"
     ],
     "correct": 0,
-    "hint": "One-way current."
+    "hint": "One-way current.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Tube that amplifies with grid",
@@ -373,7 +466,10 @@
       "Phototube"
     ],
     "correct": 0,
-    "hint": "Control grid modulates flow."
+    "hint": "Control grid modulates flow.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Tetrode/Pentode add",
@@ -384,7 +480,10 @@
       "More vacuum"
     ],
     "correct": 0,
-    "hint": "Improve gain and reduce noise."
+    "hint": "Improve gain and reduce noise.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "CRT stands for",
@@ -395,7 +494,10 @@
       "Capacitive Ray Transceiver"
     ],
     "correct": 0,
-    "hint": "Old TVs and scopes."
+    "hint": "Old TVs and scopes.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "CRT works by firing",
@@ -406,7 +508,10 @@
       "Neutron beams"
     ],
     "correct": 0,
-    "hint": "Onto a phosphor screen."
+    "hint": "Onto a phosphor screen.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Phototube’s main function",
@@ -417,7 +522,10 @@
       "Switch AC power"
     ],
     "correct": 0,
-    "hint": "Used in light meters."
+    "hint": "Used in light meters.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Gas discharge tubes are used in",
@@ -428,7 +536,10 @@
       "Speakers"
     ],
     "correct": 0,
-    "hint": "Glow and protection."
+    "hint": "Glow and protection.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Tubes were replaced mainly because",
@@ -439,7 +550,10 @@
       "Transistors need glass"
     ],
     "correct": 0,
-    "hint": "Size, power, reliability."
+    "hint": "Size, power, reliability.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Transistor discovery era",
@@ -450,7 +564,10 @@
       "1980s"
     ],
     "correct": 0,
-    "hint": "After tube dominance."
+    "hint": "After tube dominance.",
+    "tags": [
+      "Semiconductor devices"
+    ]
   },
   {
     "q": "Microchips integrate",
@@ -461,7 +578,10 @@
       "Relays and coils"
     ],
     "correct": 0,
-    "hint": "On silicon wafer."
+    "hint": "On silicon wafer.",
+    "tags": [
+      "Semiconductor devices"
+    ]
   },
   {
     "q": "Semiconductor conductivity can be",
@@ -472,7 +592,10 @@
       "Only zero"
     ],
     "correct": 0,
-    "hint": "Doping, fields, light, heat."
+    "hint": "Doping, fields, light, heat.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Valence electrons affect",
@@ -483,7 +606,11 @@
       "Weight only"
     ],
     "correct": 0,
-    "hint": "Outer shell behavior."
+    "hint": "Outer shell behavior.",
+    "tags": [
+      "Atomic structure",
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Which has tightly bound electrons?",
@@ -494,7 +621,10 @@
       "Electrolyte"
     ],
     "correct": 0,
-    "hint": "Hard to free carriers."
+    "hint": "Hard to free carriers.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Which has many free electrons?",
@@ -505,7 +635,10 @@
       "Dielectric only"
     ],
     "correct": 0,
-    "hint": "Good for wiring."
+    "hint": "Good for wiring.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Germanium is a",
@@ -516,7 +649,10 @@
       "Superconductor"
     ],
     "correct": 0,
-    "hint": "Group IV like silicon."
+    "hint": "Group IV like silicon.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Silicon typically has",
@@ -527,7 +663,10 @@
       "No valence electrons"
     ],
     "correct": 0,
-    "hint": "Tetra-valent."
+    "hint": "Tetra-valent.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Atomic nucleus discovered in",
@@ -538,7 +677,11 @@
       "1917"
     ],
     "correct": 0,
-    "hint": "Rutherford’s model."
+    "hint": "Rutherford’s model.",
+    "tags": [
+      "Atomic structure",
+      "History & discoveries"
+    ]
   },
   {
     "q": "Electron discovery year",
@@ -549,7 +692,11 @@
       "1932"
     ],
     "correct": 0,
-    "hint": "J. J. Thomson era."
+    "hint": "J. J. Thomson era.",
+    "tags": [
+      "Atomic structure",
+      "History & discoveries"
+    ]
   },
   {
     "q": "Neutron discovery year",
@@ -560,7 +707,11 @@
       "1905"
     ],
     "correct": 0,
-    "hint": "Chadwick."
+    "hint": "Chadwick.",
+    "tags": [
+      "Atomic structure",
+      "History & discoveries"
+    ]
   },
   {
     "q": "Early rectifiers in radios used",
@@ -571,7 +722,10 @@
       "SCRs"
     ],
     "correct": 0,
-    "hint": "One-way current device."
+    "hint": "One-way current device.",
+    "tags": [
+      "Circuits & applications"
+    ]
   },
   {
     "q": "Triode best use historically",
@@ -582,7 +736,10 @@
       "Voltage regulation"
     ],
     "correct": 0,
-    "hint": "Microphones, radios."
+    "hint": "Microphones, radios.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Pentode advantage vs triode",
@@ -593,7 +750,10 @@
       "No vacuum needed"
     ],
     "correct": 0,
-    "hint": "Extra grids help."
+    "hint": "Extra grids help.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Phototubes respond to",
@@ -604,7 +764,10 @@
       "Pressure"
     ],
     "correct": 0,
-    "hint": "Photoelectric effect."
+    "hint": "Photoelectric effect.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Gas discharge tube medium",
@@ -615,7 +778,10 @@
       "Liquid"
     ],
     "correct": 0,
-    "hint": "Ionized at voltage."
+    "hint": "Ionized at voltage.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Tubes are ancestors of",
@@ -626,7 +792,10 @@
       "Biology"
     ],
     "correct": 0,
-    "hint": "Pre-transistor era."
+    "hint": "Pre-transistor era.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Valence electrons are important for",
@@ -637,7 +806,11 @@
       "Thermal expansion only"
     ],
     "correct": 0,
-    "hint": "Outer shell activity."
+    "hint": "Outer shell activity.",
+    "tags": [
+      "Atomic structure",
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Conductors example in slides",
@@ -648,7 +821,10 @@
       "Air"
     ],
     "correct": 0,
-    "hint": "Metal wiring."
+    "hint": "Metal wiring.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Insulators example in slides",
@@ -659,7 +835,10 @@
       "Iron"
     ],
     "correct": 0,
-    "hint": "Protective coating."
+    "hint": "Protective coating.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Semiconductors listed include",
@@ -670,7 +849,10 @@
       "Air, Vacuum"
     ],
     "correct": 0,
-    "hint": "Group IV elements."
+    "hint": "Group IV elements.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Atoms are the",
@@ -681,7 +863,10 @@
       "Charged carriers only"
     ],
     "correct": 0,
-    "hint": "Retain element properties."
+    "hint": "Retain element properties.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Charge neutrality means",
@@ -692,7 +877,10 @@
       "Electrons = neutrons"
     ],
     "correct": 0,
-    "hint": "Balanced charges."
+    "hint": "Balanced charges.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Isotopes differ by",
@@ -703,7 +891,10 @@
       "Valence only"
     ],
     "correct": 0,
-    "hint": "Same element, different mass."
+    "hint": "Same element, different mass.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Early oscilloscopes used",
@@ -714,7 +905,10 @@
       "Plasma"
     ],
     "correct": 0,
-    "hint": "Green phosphor glow."
+    "hint": "Green phosphor glow.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Neon signage uses",
@@ -725,7 +919,10 @@
       "SCRs"
     ],
     "correct": 0,
-    "hint": "Ionized gas light."
+    "hint": "Ionized gas light.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Surge protectors can use",
@@ -736,7 +933,10 @@
       "Varistors only"
     ],
     "correct": 0,
-    "hint": "Clamps high voltage."
+    "hint": "Clamps high voltage.",
+    "tags": [
+      "Circuits & applications"
+    ]
   },
   {
     "q": "Transistors are made from",
@@ -747,7 +947,10 @@
       "Vacuum"
     ],
     "correct": 0,
-    "hint": "Si, Ge base."
+    "hint": "Si, Ge base.",
+    "tags": [
+      "Semiconductor devices"
+    ]
   },
   {
     "q": "Microchips are built on",
@@ -758,7 +961,10 @@
       "Copper"
     ],
     "correct": 0,
-    "hint": "Wafer substrate."
+    "hint": "Wafer substrate.",
+    "tags": [
+      "Semiconductor devices"
+    ]
   },
   {
     "q": "Which tube detects light?",
@@ -769,7 +975,10 @@
       "Diode tube"
     ],
     "correct": 0,
-    "hint": "Photoelectric device."
+    "hint": "Photoelectric device.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Which device fires electrons at phosphor?",
@@ -780,7 +989,10 @@
       "Laser"
     ],
     "correct": 0,
-    "hint": "Old displays."
+    "hint": "Old displays.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Which tube has control grid?",
@@ -791,7 +1003,10 @@
       "CRT"
     ],
     "correct": 0,
-    "hint": "Enables amplification."
+    "hint": "Enables amplification.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Which tube is like one-way street?",
@@ -802,7 +1017,10 @@
       "Phototube"
     ],
     "correct": 0,
-    "hint": "Rectifier."
+    "hint": "Rectifier.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Vacuum tube also called",
@@ -813,7 +1031,10 @@
       "Ion lamp"
     ],
     "correct": 0,
-    "hint": "Historic term."
+    "hint": "Historic term.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Tubes control current in",
@@ -824,7 +1045,10 @@
       "Plasma only"
     ],
     "correct": 0,
-    "hint": "Two media mentioned."
+    "hint": "Two media mentioned.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Semiconductors allow",
@@ -835,7 +1059,10 @@
       "Only superconductivity"
     ],
     "correct": 0,
-    "hint": "Middle behavior."
+    "hint": "Middle behavior.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Outer electrons are called",
@@ -846,7 +1073,10 @@
       "Ion cores"
     ],
     "correct": 0,
-    "hint": "In the outer shell."
+    "hint": "In the outer shell.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Copper typically has",
@@ -857,7 +1087,10 @@
       "No valence electrons"
     ],
     "correct": 0,
-    "hint": "Group I-like behavior."
+    "hint": "Group I-like behavior.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Rubber typically has",
@@ -868,7 +1101,10 @@
       "Three valence electrons"
     ],
     "correct": 0,
-    "hint": "Very poor conductor."
+    "hint": "Very poor conductor.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Silicon’s group suggests",
@@ -879,7 +1115,10 @@
       "No bonds"
     ],
     "correct": 0,
-    "hint": "Tetrahedral networks."
+    "hint": "Tetrahedral networks.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Rutherford model emphasized",
@@ -890,7 +1129,10 @@
       "Quantum fields"
     ],
     "correct": 0,
-    "hint": "1911 discovery."
+    "hint": "1911 discovery.",
+    "tags": [
+      "History & discoveries"
+    ]
   },
   {
     "q": "Thomson is tied to",
@@ -901,7 +1143,10 @@
       "Quantum mechanics"
     ],
     "correct": 0,
-    "hint": "Cathode rays."
+    "hint": "Cathode rays.",
+    "tags": [
+      "History & discoveries"
+    ]
   },
   {
     "q": "Chadwick is tied to",
@@ -912,7 +1157,10 @@
       "Relativity"
     ],
     "correct": 0,
-    "hint": "1932 result."
+    "hint": "1932 result.",
+    "tags": [
+      "History & discoveries"
+    ]
   },
   {
     "q": "Transistors replaced tubes because",
@@ -923,7 +1171,10 @@
       "More heaters"
     ],
     "correct": 0,
-    "hint": "Efficiency benefit."
+    "hint": "Efficiency benefit.",
+    "tags": [
+      "Semiconductor devices"
+    ]
   },
   {
     "q": "CRT still found in",
@@ -934,7 +1185,10 @@
       "Quantum dots only"
     ],
     "correct": 0,
-    "hint": "Specialized gear."
+    "hint": "Specialized gear.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Phototube former use",
@@ -945,7 +1199,10 @@
       "Batteries"
     ],
     "correct": 0,
-    "hint": "Old cameras."
+    "hint": "Old cameras.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Gas discharge clamps",
@@ -956,7 +1213,11 @@
       "Temperature"
     ],
     "correct": 0,
-    "hint": "Surge protection."
+    "hint": "Surge protection.",
+    "tags": [
+      "Circuits & applications",
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Valence importance in",
@@ -967,7 +1228,10 @@
       "Elasticity"
     ],
     "correct": 0,
-    "hint": "Core of materials."
+    "hint": "Core of materials.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Semiconductors are",
@@ -978,7 +1242,10 @@
       "Same as insulators"
     ],
     "correct": 0,
-    "hint": "Intermediate behavior."
+    "hint": "Intermediate behavior.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Microchip birth came from",
@@ -989,7 +1256,10 @@
       "Stacking capacitors"
     ],
     "correct": 0,
-    "hint": "On silicon die."
+    "hint": "On silicon die.",
+    "tags": [
+      "Semiconductor devices"
+    ]
   },
   {
     "q": "Device smaller than tube that replaced it",
@@ -1000,7 +1270,10 @@
       "Varistor"
     ],
     "correct": 0,
-    "hint": "Solid-state."
+    "hint": "Solid-state.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Valence shell term refers to",
@@ -1011,7 +1284,10 @@
       "Photon field"
     ],
     "correct": 0,
-    "hint": "Chemistry term."
+    "hint": "Chemistry term.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Electrons are",
@@ -1022,7 +1298,10 @@
       "Ions"
     ],
     "correct": 0,
-    "hint": "Flow in metals."
+    "hint": "Flow in metals.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Protons are located in",
@@ -1033,7 +1312,10 @@
       "Vacuum"
     ],
     "correct": 0,
-    "hint": "Center of atom."
+    "hint": "Center of atom.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Neutrons are located in",
@@ -1044,7 +1326,10 @@
       "Electron cloud"
     ],
     "correct": 0,
-    "hint": "Neutral core."
+    "hint": "Neutral core.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Charge of proton equals",
@@ -1055,7 +1340,10 @@
       "Zero"
     ],
     "correct": 0,
-    "hint": "Opposite sign."
+    "hint": "Opposite sign.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Rectifier function is to",
@@ -1066,7 +1354,10 @@
       "Store energy"
     ],
     "correct": 0,
-    "hint": "One-way current action."
+    "hint": "One-way current action.",
+    "tags": [
+      "Circuits & applications"
+    ]
   },
   {
     "q": "Amplifier function is to",
@@ -1077,7 +1368,10 @@
       "Detect light"
     ],
     "correct": 0,
-    "hint": "Triode did this early."
+    "hint": "Triode did this early.",
+    "tags": [
+      "Circuits & applications"
+    ]
   },
   {
     "q": "Early TV transmitters used",
@@ -1088,7 +1382,10 @@
       "CRTs"
     ],
     "correct": 0,
-    "hint": "Extra grids helped power stages."
+    "hint": "Extra grids helped power stages.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Which device detects light but not amplify",
@@ -1099,7 +1396,10 @@
       "Thermistor"
     ],
     "correct": 0,
-    "hint": "Simple photoemission."
+    "hint": "Simple photoemission.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Which statement matches conductors?",
@@ -1110,7 +1410,10 @@
       "No electrons"
     ],
     "correct": 0,
-    "hint": "Good carriers."
+    "hint": "Good carriers.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Which statement matches insulators?",
@@ -1121,7 +1424,10 @@
       "No atoms"
     ],
     "correct": 0,
-    "hint": "Hard to move charges."
+    "hint": "Hard to move charges.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Which statement matches semiconductors?",
@@ -1132,7 +1438,10 @@
       "Only work cold"
     ],
     "correct": 0,
-    "hint": "Doping, temperature matter."
+    "hint": "Doping, temperature matter.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Atomic building block keeps",
@@ -1143,7 +1452,10 @@
       "No properties"
     ],
     "correct": 0,
-    "hint": "Definition slide."
+    "hint": "Definition slide.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Which slide example is a conductor?",
@@ -1154,7 +1466,10 @@
       "Dry wood"
     ],
     "correct": 0,
-    "hint": "Metallic bonding."
+    "hint": "Metallic bonding.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Which slide example is an insulator?",
@@ -1165,7 +1480,10 @@
       "Iron"
     ],
     "correct": 0,
-    "hint": "Cable jackets."
+    "hint": "Cable jackets.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Tubes control flow via",
@@ -1176,7 +1494,10 @@
       "Heat alone"
     ],
     "correct": 0,
-    "hint": "Cathode, anode, grids."
+    "hint": "Cathode, anode, grids.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Modern electronics core is",
@@ -1187,7 +1508,10 @@
       "Springs"
     ],
     "correct": 0,
-    "hint": "Solid-state devices."
+    "hint": "Solid-state devices.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Microchips pack",
@@ -1198,7 +1522,10 @@
       "Only capacitors"
     ],
     "correct": 0,
-    "hint": "IC era."
+    "hint": "IC era.",
+    "tags": [
+      "Semiconductor devices"
+    ]
   },
   {
     "q": "Electron cloud contains",
@@ -1209,7 +1536,10 @@
       "Ions only"
     ],
     "correct": 0,
-    "hint": "Outside nucleus."
+    "hint": "Outside nucleus.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "An atom with more electrons than protons",
@@ -1220,7 +1550,10 @@
       "Element change"
     ],
     "correct": 0,
-    "hint": "Net negative charge."
+    "hint": "Net negative charge.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "An atom with fewer electrons than protons",
@@ -1231,7 +1564,10 @@
       "Neutral atom"
     ],
     "correct": 0,
-    "hint": "Net positive charge."
+    "hint": "Net positive charge.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "One role of valence electrons",
@@ -1242,7 +1578,11 @@
       "Create photons only"
     ],
     "correct": 0,
-    "hint": "Reactions and bonding."
+    "hint": "Reactions and bonding.",
+    "tags": [
+      "Atomic structure",
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Conduction in metals mainly via",
@@ -1253,7 +1593,10 @@
       "Ions"
     ],
     "correct": 0,
-    "hint": "Sea of electrons."
+    "hint": "Sea of electrons.",
+    "tags": [
+      "General"
+    ]
   },
   {
     "q": "Insulators used for",
@@ -1264,7 +1607,10 @@
       "Detecting light"
     ],
     "correct": 0,
-    "hint": "Safety and isolation."
+    "hint": "Safety and isolation.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "Semiconductors used for",
@@ -1275,7 +1621,10 @@
       "Transformers only"
     ],
     "correct": 0,
-    "hint": "Core components."
+    "hint": "Core components.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "First microchips formed by",
@@ -1286,7 +1635,10 @@
       "Using only resistors"
     ],
     "correct": 0,
-    "hint": "Integration step."
+    "hint": "Integration step.",
+    "tags": [
+      "Semiconductor devices"
+    ]
   },
   {
     "q": "Diode tube acts as",
@@ -1297,7 +1649,10 @@
       "Light source"
     ],
     "correct": 0,
-    "hint": "Rectifies."
+    "hint": "Rectifies.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Triode includes",
@@ -1308,7 +1663,10 @@
       "Gas fill only"
     ],
     "correct": 0,
-    "hint": "Three electrodes."
+    "hint": "Three electrodes.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "CRT image created by",
@@ -1319,7 +1677,10 @@
       "Laser scanning mirrors"
     ],
     "correct": 0,
-    "hint": "Phosphor glow."
+    "hint": "Phosphor glow.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Neon glow produced by",
@@ -1330,7 +1691,10 @@
       "Elastic collisions only"
     ],
     "correct": 0,
-    "hint": "Ionized gas emission."
+    "hint": "Ionized gas emission.",
+    "tags": [
+      "Vacuum tubes & CRTs"
+    ]
   },
   {
     "q": "Surge protection role is to",
@@ -1341,7 +1705,10 @@
       "Detect light"
     ],
     "correct": 0,
-    "hint": "Protect equipment."
+    "hint": "Protect equipment.",
+    "tags": [
+      "Circuits & applications"
+    ]
   },
   {
     "q": "Which pair names a semiconductor?",
@@ -1352,7 +1719,10 @@
       "Air, Water"
     ],
     "correct": 0,
-    "hint": "Periodic table Group IV."
+    "hint": "Periodic table Group IV.",
+    "tags": [
+      "Materials & conduction"
+    ]
   },
   {
     "q": "In a neutral atom, electrons equal",
@@ -1363,7 +1733,10 @@
       "Zero"
     ],
     "correct": 0,
-    "hint": "Neutral charge."
+    "hint": "Neutral charge.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Isotope example changes",
@@ -1374,7 +1747,10 @@
       "Valence only"
     ],
     "correct": 0,
-    "hint": "Mass changes."
+    "hint": "Mass changes.",
+    "tags": [
+      "Atomic structure"
+    ]
   },
   {
     "q": "Electron discovery used",
@@ -1385,148 +1761,150 @@
       "Gamma rays"
     ],
     "correct": 0,
-    "hint": "JJ Thomson setup."
+    "hint": "JJ Thomson setup.",
+    "tags": [
+      "Atomic structure"
+    ]
   }
-]
-    const $ = sel => document.querySelector(sel);
-    const progressEl = $("#progress");
-    const barEl = $("#bar");
-    const scoreEl = $("#score");
-    const qEl = $("#question");
-    const listEl = $("#choices");
-    const hintBtn = $("#hintBtn");
-    const hintText = $("#hintText");
-    const nextBtn = $("#nextBtn");
-    const reviewBtn = $("#reviewBtn");
-    const restartBtn = $("#restartBtn");
-
-    const KEY = "flashcards-electronics-demo-v1";
-    const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
-
-    let CARDS = [];
-    let order = saved.order || shuffle([...Array(DEFAULT_CARDS.length).keys()]);
-    let idx = clamp(saved.idx ?? 0, 0, order.length - 1);
-    let score = saved.score ?? 0;
-    let best = saved.best ?? 0;
-    let wrongBank = saved.wrongBank || [];
-    let reviewMode = saved.reviewMode || false;
-
-    let currentChoiceOrder = [];
-
-
-    function persist(){ localStorage.setItem(KEY, JSON.stringify({ order, idx, score, best, wrongBank, reviewMode })); }
-    function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-    function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
-
-    async function loadCards(){
-      try {
-        const resp = await fetch("cards.json", {cache:"no-store"});
-        if(!resp.ok) throw new Error("no cards.json");
-        const data = await resp.json();
-        if(Array.isArray(data) && data.length){ CARDS = data; }
-      } catch(e){ CARDS = DEFAULT_CARDS; }
-      // If we loaded larger deck, resize order and idx safely
-      order = saved.order && saved.order.length === CARDS.length ? saved.order : shuffle([...Array(CARDS.length).keys()]);
-      idx = clamp(saved.idx ?? 0, 0, order.length - 1);
-      render();
+];
     }
-
- function render(){
-  const seq = reviewMode ? wrongBank : order;
-  const total = seq.length || 1;
-  const cardIndex = seq.length ? seq[idx % seq.length] : order[0];
-  const card = CARDS[cardIndex];
-
-  progressEl.textContent = `Q ${Math.min(idx+1, total)} / ${total}`;
-  barEl.style.width = `${((idx)/Math.max(total-1,1))*100}%`;
-  scoreEl.textContent = `Score: ${score}${best ? ` (Best: ${best})` : ""}`;
-  qEl.textContent = card.q;
-
-  // NEW: shuffle choice order for this render
-  currentChoiceOrder = shuffle(card.choices.map((_, i) => i));
-
-  listEl.innerHTML = "";
-  hintText.hidden = true;
-  hintText.textContent = card.hint || "No hint for this card.";
-
-  currentChoiceOrder.forEach((origIdx, pos) => {
-    const li = document.createElement("li");
-    li.className = "choice";
-    li.setAttribute("role","option");
-    li.tabIndex = 0;
-    li.dataset.idxOriginal = String(origIdx);
-    li.innerHTML = `<span class="index">${pos+1}.</span> ${card.choices[origIdx]}`;
-    li.addEventListener("click", () => check(origIdx, cardIndex));
-    li.addEventListener("keydown", (e) => {
-      if(e.key==="Enter" || e.key===" "){ e.preventDefault(); check(origIdx, cardIndex); }
-    });
-    listEl.appendChild(li);
-  });
-
-  nextBtn.disabled = true;
-  persist();
-}
-
-
-   function check(selectedOriginalIdx, cardIndex){
-  // prevent double-marking
-  if([...listEl.children].some(li => li.classList.contains("correct") || li.classList.contains("incorrect"))) return;
-
-  const card = CARDS[cardIndex];
-  [...listEl.children].forEach(li => {
-    const orig = Number(li.dataset.idxOriginal);
-    // mark the true correct choice
-    if (orig === card.correct) li.classList.add("correct");
-    // mark the chosen one wrong if needed
-    if (orig === selectedOriginalIdx && selectedOriginalIdx !== card.correct) li.classList.add("incorrect");
-  });
-
-  if (selectedOriginalIdx === card.correct) {
-    score++;
-  } else {
-    if (!wrongBank.includes(cardIndex)) wrongBank.push(cardIndex);
+    // normalize tags
+    CARDS = data.map(c=>({ ...c, tags: Array.isArray(c.tags)&&c.tags.length? c.tags : ['General'] }));
+    buildTagbar();
+    updateSelectionInfo();
   }
-  if (score > best) best = score;
-  nextBtn.disabled = false;
-  persist();
-}
 
+  function allTags(){
+    const s = new Set();
+    CARDS.forEach(c=> c.tags.forEach(t=> s.add(t)) );
+    return Array.from(s).sort();
+  }
 
-    function next(){
-      const seq = reviewMode ? wrongBank : order;
-      if(seq.length===0) return;
-      idx++;
-      if(idx >= seq.length){ idx = 0; if(reviewMode) shuffle(wrongBank); else shuffle(order); }
-      render();
+  function buildTagbar(){
+    tagbar.innerHTML = '';
+    // All topics toggle
+    const allBtn = document.createElement('button');
+    allBtn.className = 'tag' + (selectedTags.size===0? ' active':'');
+    allBtn.textContent = 'All topics';
+    allBtn.addEventListener('click', ()=>{ selectedTags.clear(); updateSelectionInfo(); buildTagbar(); persist(); });
+    tagbar.appendChild(allBtn);
+
+    // counts
+    const counts = {};
+    CARDS.forEach(c=> c.tags.forEach(t=> counts[t]=(counts[t]||0)+1) );
+
+    for(const t of allTags()){
+      const active = selectedTags.has(t);
+      const btn = document.createElement('button');
+      btn.className = 'tag' + (active? ' active':'');
+      btn.innerHTML = `${t} <small>${counts[t]||0}</small>`;
+      btn.addEventListener('click', ()=>{
+        if(active) selectedTags.delete(t); else selectedTags.add(t);
+        buildTagbar(); updateSelectionInfo(); persist();
+      });
+      tagbar.appendChild(btn);
     }
+  }
 
-    function restart(){ order = shuffle([...Array(CARDS.length).keys()]); idx=0; score=0; wrongBank=[]; reviewMode=false; render(); }
+  function filteredIndices(){
+    if(selectedTags.size===0) return [...Array(CARDS.length).keys()];
+    const idxs=[]; CARDS.forEach((c,i)=>{ if(c.tags.some(t=>selectedTags.has(t))) idxs.push(i); });
+    return idxs;
+  }
 
-    function toggleReview(){
-      if(wrongBank.length===0){ alert("No wrong answers yet to review. Keep practicing!"); return; }
-      reviewMode = !reviewMode; idx=0; score=0; render();
-      reviewBtn.textContent = reviewMode ? "Exit review (R)" : "Review wrong (R)";
-    }
+  function updateSelectionInfo(){
+    const idxs = filteredIndices();
+    const tagList = selectedTags.size? Array.from(selectedTags).join(', ') : 'All topics';
+    selInfo.textContent = `${idxs.length} cards selected · ${tagList}`;
+  }
 
-    hintBtn.addEventListener("click", ()=>{ const open = hintText.hidden; hintText.hidden = !open; hintBtn.setAttribute("aria-expanded", String(open)); hintBtn.textContent = open ? "Hide hint (H)" : "Show hint (H)"; });
-    nextBtn.addEventListener("click", next);
-    restartBtn.addEventListener("click", restart);
-    reviewBtn.addEventListener("click", toggleReview);
+  function start(){
+    FILTERED = filteredIndices();
+    order = shuffle([...FILTERED]);
+    idx=0; score=0; wrongBank=[]; reviewMode=false;
+    document.querySelector('.cards')?.classList.add('hidden');
+    quiz.style.display = 'block';
+    render();
+  }
 
-    window.addEventListener("keydown", (e)=>{
-  if(e.key >= "1" && e.key <= "4"){
-    const pos = Number(e.key) - 1;                // displayed position
-    const selectedOriginalIdx = currentChoiceOrder[pos]; // map to original index
+  function render(){
     const seq = reviewMode ? wrongBank : order;
-    const cardIndex = seq.length ? seq[idx % seq.length] : order[0];
-    if (selectedOriginalIdx !== undefined) check(selectedOriginalIdx, cardIndex);
-  }
-  if(e.key.toLowerCase()==="h") hintBtn.click();
-  if(e.key.toLowerCase()==="n") nextBtn.click();
-  if(e.key.toLowerCase()==="r") reviewBtn.click();
-});
+    if(seq.length===0){ qEl.textContent = 'No cards in this selection.'; return; }
+    const total = seq.length;
+    const cardIndex = seq[idx % seq.length];
+    const card = CARDS[cardIndex];
 
-    loadCards();
-  </script>
+    ptext.textContent = `Q ${Math.min(idx+1,total)} / ${total}`;
+    bar.style.width = `${(idx/Math.max(total-1,1))*100}%`;
+    scoreEl.textContent = `Score: ${score}${best? ` (Best: ${best})`:''}`;
+    qEl.textContent = card.q;
+
+    currentChoiceOrder = shuffle(card.choices.map((_,i)=>i));
+    listEl.innerHTML='';
+    hintText.hidden = true; hintText.textContent = card.hint || 'No hint for this card.';
+
+    currentChoiceOrder.forEach((origIdx, pos)=>{
+      const li = document.createElement('li');
+      li.className = 'choice'; li.tabIndex=0; li.dataset.idxOriginal = String(origIdx);
+      li.innerHTML = `<span class="index">${pos+1}.</span> ${card.choices[origIdx]}`;
+      li.addEventListener('click', ()=> check(origIdx, cardIndex));
+      li.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); check(origIdx, cardIndex);} });
+      listEl.appendChild(li);
+    });
+  }
+
+  function check(selectedOriginalIdx, cardIndex){
+    if([...listEl.children].some(li => li.classList.contains('correct')||li.classList.contains('incorrect'))) return;
+    const card = CARDS[cardIndex];
+    // mark correctness based on original index
+    [...listEl.children].forEach((li)=>{
+      const orig = Number(li.dataset.idxOriginal);
+      if(orig === card.correct) li.classList.add('correct');
+      if(orig === selectedOriginalIdx && selectedOriginalIdx !== card.correct) li.classList.add('incorrect');
+    });
+    if(selectedOriginalIdx === card.correct) score++; else if(!wrongBank.includes(cardIndex)) wrongBank.push(cardIndex);
+    if(score>best) best = score;
+  }
+
+  function next(){
+    const seq = reviewMode ? wrongBank : order;
+    if(seq.length===0) return;
+    idx++;
+    if(idx >= seq.length){ idx = 0; if(reviewMode) shuffle(wrongBank); else shuffle(order); }
+    render();
+  }
+
+  function restart(){ order = shuffle([...FILTERED]); idx=0; score=0; wrongBank=[]; reviewMode=false; render(); }
+  function toggleReview(){ if(wrongBank.length===0){ alert('No wrong answers yet to review.'); return; } reviewMode=!reviewMode; idx=0; score=0; render(); reviewBtn.textContent = reviewMode? 'Exit review (R)':'Review wrong (R)'; }
+  function back(){ quiz.style.display='none'; updateSelectionInfo(); buildTagbar(); }
+
+  // events
+  startBtn.addEventListener('click', start);
+  selectAllBtn.addEventListener('click', ()=>{ selectedTags.clear(); buildTagbar(); updateSelectionInfo(); persist(); });
+  clearBtn.addEventListener('click', ()=>{ selectedTags = new Set(); buildTagbar(); updateSelectionInfo(); persist(); });
+
+  nextBtn.addEventListener('click', next);
+  restartBtn.addEventListener('click', restart);
+  reviewBtn.addEventListener('click', toggleReview);
+  backBtn.addEventListener('click', back);
+  hintBtn.addEventListener('click', ()=>{ const open = hintText.hidden; hintText.hidden=!open; hintBtn.setAttribute('aria-expanded', String(open)); hintBtn.textContent = open? 'Hide hint (H)':'Show hint (H)'; });
+
+  window.addEventListener('keydown', (e)=>{
+    if(quiz.style.display==='block'){
+      if(e.key>='1'&&e.key<='4'){
+        const pos = Number(e.key)-1;
+        const seq = reviewMode ? wrongBank : order;
+        const cardIndex = seq.length ? seq[idx % seq.length] : order[0];
+        const selectedOriginalIdx = currentChoiceOrder[pos];
+        if(selectedOriginalIdx !== undefined) check(selectedOriginalIdx, cardIndex);
+      }
+      if(e.key.toLowerCase()==='h') hintBtn.click();
+      if(e.key.toLowerCase()==='n') nextBtn.click();
+      if(e.key.toLowerCase()==='r') reviewBtn.click();
+    }
+  });
+
+  load();
+</script>
 </body>
 </html>
