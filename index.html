@@ -2,29 +2,90 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Electronics Flashcards</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="./styles.css" />
+  <title>Electronics Flashcards</title>
+  <style>
+    :root{
+      --bg: #f6fbff;
+      --card: #ffffff;
+      --ink: #13213a;
+      --muted: #5a6a85;
+      --brand: #0a77d5;
+      --brand-2: #0e63ad;
+      --ok: #17a34a;
+      --bad: #e23d3d;
+      --ring: rgba(10,119,213,0.25);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: radial-gradient(1200px 600px at 10% -20%, #e7f5ff, transparent) var(--bg);
+      font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .app { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+
+    .header { text-align: center; margin-bottom: 14px; }
+    .header h1 { margin: 0; font-size: clamp(1.25rem, 2.4vw, 2rem); color: var(--brand-2); }
+    .sub { color: var(--muted); font-size: .95rem; margin-top: 4px; }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    }
+
+    .meta { display: flex; justify-content: space-between; color: var(--muted); font-size: .95rem; margin-bottom: 10px; }
+
+    .progressbar { height: 8px; background: #eaf3fb; border-radius: 999px; overflow: hidden; margin: 8px 0 14px; }
+    .progressbar > i { display:block; height:100%; width:0%; background: linear-gradient(145deg, var(--brand), var(--brand-2)); transition: width .25s ease; }
+
+    .question { margin: 6px 0 12px; font-size: clamp(1.05rem, 2vw, 1.35rem); }
+
+    .choices { padding: 0; margin: 0 0 8px; list-style: none; display: grid; gap: 10px; }
+    .choice { border: 1px solid #e6eef7; border-radius: 12px; padding: 12px 14px; cursor: pointer; transition: transform .04s ease, box-shadow .1s ease, border-color .2s ease; background:#fff; outline: none; }
+    .choice:hover { transform: translateY(-1px); }
+    .choice:focus-visible { box-shadow: 0 0 0 4px var(--ring); border-color: var(--brand); }
+    .choice.correct { border-color: rgba(23,163,74,.55); background: #f1fcf5; }
+    .choice.incorrect { border-color: rgba(226,61,61,.55); background: #fff5f5; }
+
+    .hint-row { display: flex; gap: 10px; align-items: center; margin: 8px 0 12px; }
+    .hint { color: var(--muted); background: #f7fbff; border: 1px dashed #cfe8ff; border-radius: 10px; padding: 8px 10px; }
+
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    .btn { border: 1px solid #d7e7f7; background: #fff; color: var(--ink); padding: 10px 14px; border-radius: 12px; cursor: pointer; font-weight: 600; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:focus-visible { box-shadow: 0 0 0 4px var(--ring); outline: none; }
+    .btn.primary { background: linear-gradient(145deg, var(--brand), var(--brand-2)); color: #fff; border: none; }
+    .btn.ghost { background: #f3f8fe; }
+    .btn.danger { border-color: #ffd6d6; }
+
+    .tiny { margin-top: 12px; color: var(--muted); font-size: .9rem; }
+    .footer { text-align: center; color: var(--muted); margin: 14px 0; font-size: .9rem; }
+  </style>
 </head>
 <body>
   <main class="app">
     <header class="header">
       <h1>⚡ Electronics Flashcards</h1>
-      <div class="sub">Focus: devices, tubes, and semiconductor basics</div>
+      <div class="sub">Exactly matching the demo look & behavior · Keyboard: 1–4, H, N, R</div>
     </header>
 
     <section class="card" role="region" aria-live="polite">
       <div class="meta">
-        <div id="progress">Q 1 / 12</div>
+        <div id="progress">Q 1 / 4</div>
         <div id="score">Score: 0</div>
       </div>
+      <div class="progressbar" aria-hidden="true"><i id="bar" style="width:0%"></i></div>
 
       <h2 id="question" class="question">Loading…</h2>
 
-      <ol id="choices" class="choices" role="listbox" aria-label="Answer choices">
-        <!-- choices injected by JS -->
-      </ol>
+      <ol id="choices" class="choices" role="listbox" aria-label="Answer choices"></ol>
 
       <div class="hint-row">
         <button id="hintBtn" class="btn ghost" aria-controls="hintText" aria-expanded="false">Show hint (H)</button>
@@ -49,10 +110,1394 @@
     </section>
 
     <footer class="footer">
-      <span>Progress and best score are saved locally.</span>
+      <span>Progress & best score saved locally.</span>
     </footer>
   </main>
 
-  <script src="./app.js"></script>
+  <script>
+    // ===== Demo-matching dataset loader =====
+    // Option 1: provide an external /cards.json with the format below.
+    // Option 2: the inline DEFAULT_CARDS will be used.
+    const DEFAULT_CARDS = [
+  {
+    "q": "What are the three main atomic particles?",
+    "choices": [
+      "Proton, neutron, electron",
+      "Photon, proton, ion",
+      "Electron, positron, muon",
+      "Quark, gluon, boson"
+    ],
+    "correct": 0,
+    "hint": "Think basic chemistry building blocks."
+  },
+  {
+    "q": "Proton’s electric charge is",
+    "choices": [
+      "+1.6022×10^-19 C",
+      "0 C",
+      "-1.6022×10^-19 C",
+      "+3.2×10^-19 C"
+    ],
+    "correct": 0,
+    "hint": "Equal magnitude to electron, opposite sign."
+  },
+  {
+    "q": "Electron’s charge is",
+    "choices": [
+      "-1.6022×10^-19 C",
+      "+1.6022×10^-19 C",
+      "0 C",
+      "-3.2×10^-19 C"
+    ],
+    "correct": 0,
+    "hint": "Negative of the proton."
+  },
+  {
+    "q": "Electron’s mass (kg) in the table is",
+    "choices": [
+      "9.1096×10^-31",
+      "1.6726×10^-27",
+      "1.6726×10^-24",
+      "9.11×10^-28"
+    ],
+    "correct": 0,
+    "hint": "About 1/1836 of a proton."
+  },
+  {
+    "q": "Proton’s mass (kg) listed is",
+    "choices": [
+      "1.6726×10^-27",
+      "9.1096×10^-31",
+      "1.0×10^-23",
+      "3.0×10^-29"
+    ],
+    "correct": 0,
+    "hint": "Much heavier than an electron."
+  },
+  {
+    "q": "Neutron’s listed charge is",
+    "choices": [
+      "0 C",
+      "+1.6022×10^-19 C",
+      "-1.6022×10^-19 C",
+      "+3.2×10^-19 C"
+    ],
+    "correct": 0,
+    "hint": "Neutral by name."
+  },
+  {
+    "q": "Who discovered the electron?",
+    "choices": [
+      "J. J. Thomson",
+      "Ernest Rutherford",
+      "James Chadwick",
+      "Niels Bohr"
+    ],
+    "correct": 0,
+    "hint": "Cathode rays experiments."
+  },
+  {
+    "q": "Who identified the proton (1917)?",
+    "choices": [
+      "Ernest Rutherford",
+      "J. J. Thomson",
+      "James Chadwick",
+      "Robert Millikan"
+    ],
+    "correct": 0,
+    "hint": "Gold-foil fame too."
+  },
+  {
+    "q": "Who discovered the neutron (1932)?",
+    "choices": [
+      "James Chadwick",
+      "Ernest Rutherford",
+      "J. J. Thomson",
+      "Paul Dirac"
+    ],
+    "correct": 0,
+    "hint": "Neutral nucleus component."
+  },
+  {
+    "q": "Where is most atomic mass located?",
+    "choices": [
+      "Nucleus",
+      "Electron cloud",
+      "Valence band",
+      "Outer shell"
+    ],
+    "correct": 0,
+    "hint": "Dense central region."
+  },
+  {
+    "q": "Atoms typically have equal numbers of",
+    "choices": [
+      "Protons and electrons",
+      "Neutrons and electrons",
+      "Protons and neutrons",
+      "Valence and core electrons"
+    ],
+    "correct": 0,
+    "hint": "Charge neutrality."
+  },
+  {
+    "q": "Adding a proton to an atom makes",
+    "choices": [
+      "A new element",
+      "An isotope",
+      "A molecule",
+      "An ion"
+    ],
+    "correct": 0,
+    "hint": "Atomic number defines element."
+  },
+  {
+    "q": "Adding a neutron makes",
+    "choices": [
+      "An isotope",
+      "A new element",
+      "A cation",
+      "A molecule"
+    ],
+    "correct": 0,
+    "hint": "Same element, different mass."
+  },
+  {
+    "q": "Valence electrons are found in the",
+    "choices": [
+      "Outermost shell",
+      "Nucleus",
+      "Innermost shell",
+      "Conduction band only"
+    ],
+    "correct": 0,
+    "hint": "They determine bonding."
+  },
+  {
+    "q": "Conductors typically have",
+    "choices": [
+      "1 valence electron",
+      "4 valence electrons",
+      "7–8 valence electrons",
+      "No valence electrons"
+    ],
+    "correct": 0,
+    "hint": "Copper is a model case."
+  },
+  {
+    "q": "Insulators usually have",
+    "choices": [
+      "7–8 valence electrons",
+      "1 valence electron",
+      "4 valence electrons",
+      "2 valence electrons"
+    ],
+    "correct": 0,
+    "hint": "Outer shell is full or nearly full."
+  },
+  {
+    "q": "Semiconductors like Si, Ge have",
+    "choices": [
+      "4 valence electrons",
+      "1 valence electron",
+      "8 valence electrons",
+      "3 valence electrons"
+    ],
+    "correct": 0,
+    "hint": "Between conductor and insulator."
+  },
+  {
+    "q": "Example of a conductor",
+    "choices": [
+      "Copper",
+      "Rubber",
+      "Glass",
+      "Dry air"
+    ],
+    "correct": 0,
+    "hint": "Used for wires."
+  },
+  {
+    "q": "Example of an insulator",
+    "choices": [
+      "Rubber",
+      "Copper",
+      "Germanium",
+      "Silicon"
+    ],
+    "correct": 0,
+    "hint": "Protective cable jackets."
+  },
+  {
+    "q": "Electrons are easy to strip because",
+    "choices": [
+      "They are light and small",
+      "They are in nucleus",
+      "They are positively charged",
+      "They have no mass"
+    ],
+    "correct": 0,
+    "hint": "Small mass, outer shells."
+  },
+  {
+    "q": "Vacuum tubes control the flow of",
+    "choices": [
+      "Electrons in vacuum",
+      "Protons in gas",
+      "Photons in fiber",
+      "Ions in liquid"
+    ],
+    "correct": 0,
+    "hint": "Also called electron tubes."
+  },
+  {
+    "q": "Tube type that rectifies",
+    "choices": [
+      "Diode tube",
+      "Triode",
+      "Pentode",
+      "Phototube"
+    ],
+    "correct": 0,
+    "hint": "One-way current."
+  },
+  {
+    "q": "Tube that amplifies with grid",
+    "choices": [
+      "Triode",
+      "Diode",
+      "CRT",
+      "Phototube"
+    ],
+    "correct": 0,
+    "hint": "Control grid modulates flow."
+  },
+  {
+    "q": "Tetrode/Pentode add",
+    "choices": [
+      "More grids",
+      "More plates",
+      "More heaters",
+      "More vacuum"
+    ],
+    "correct": 0,
+    "hint": "Improve gain and reduce noise."
+  },
+  {
+    "q": "CRT stands for",
+    "choices": [
+      "Cathode Ray Tube",
+      "Current Relay Terminal",
+      "Controlled Resistor Transducer",
+      "Capacitive Ray Transceiver"
+    ],
+    "correct": 0,
+    "hint": "Old TVs and scopes."
+  },
+  {
+    "q": "CRT works by firing",
+    "choices": [
+      "Electron beams",
+      "Proton beams",
+      "Light beams",
+      "Neutron beams"
+    ],
+    "correct": 0,
+    "hint": "Onto a phosphor screen."
+  },
+  {
+    "q": "Phototube’s main function",
+    "choices": [
+      "Detect light",
+      "Amplify audio",
+      "Store energy",
+      "Switch AC power"
+    ],
+    "correct": 0,
+    "hint": "Used in light meters."
+  },
+  {
+    "q": "Gas discharge tubes are used in",
+    "choices": [
+      "Neon lights, surge protectors",
+      "Microprocessors",
+      "Batteries",
+      "Speakers"
+    ],
+    "correct": 0,
+    "hint": "Glow and protection."
+  },
+  {
+    "q": "Tubes were replaced mainly because",
+    "choices": [
+      "Transistors smaller and efficient",
+      "Tubes more durable",
+      "Tubes cooler",
+      "Transistors need glass"
+    ],
+    "correct": 0,
+    "hint": "Size, power, reliability."
+  },
+  {
+    "q": "Transistor discovery era",
+    "choices": [
+      "1940s",
+      "1920s",
+      "1960s",
+      "1980s"
+    ],
+    "correct": 0,
+    "hint": "After tube dominance."
+  },
+  {
+    "q": "Microchips integrate",
+    "choices": [
+      "Millions of transistors",
+      "Thousands of tubes",
+      "Batteries in series",
+      "Relays and coils"
+    ],
+    "correct": 0,
+    "hint": "On silicon wafer."
+  },
+  {
+    "q": "Semiconductor conductivity can be",
+    "choices": [
+      "Controlled externally",
+      "Fixed and unchangeable",
+      "Only high",
+      "Only zero"
+    ],
+    "correct": 0,
+    "hint": "Doping, fields, light, heat."
+  },
+  {
+    "q": "Valence electrons affect",
+    "choices": [
+      "Conduction and bonding",
+      "Nuclear decay",
+      "Magnetic poles only",
+      "Weight only"
+    ],
+    "correct": 0,
+    "hint": "Outer shell behavior."
+  },
+  {
+    "q": "Which has tightly bound electrons?",
+    "choices": [
+      "Insulator",
+      "Conductor",
+      "Semiconductor",
+      "Electrolyte"
+    ],
+    "correct": 0,
+    "hint": "Hard to free carriers."
+  },
+  {
+    "q": "Which has many free electrons?",
+    "choices": [
+      "Conductor",
+      "Insulator",
+      "Semiconductor",
+      "Dielectric only"
+    ],
+    "correct": 0,
+    "hint": "Good for wiring."
+  },
+  {
+    "q": "Germanium is a",
+    "choices": [
+      "Semiconductor",
+      "Conductor",
+      "Insulator",
+      "Superconductor"
+    ],
+    "correct": 0,
+    "hint": "Group IV like silicon."
+  },
+  {
+    "q": "Silicon typically has",
+    "choices": [
+      "Four valence electrons",
+      "One valence electron",
+      "Seven valence electrons",
+      "No valence electrons"
+    ],
+    "correct": 0,
+    "hint": "Tetra-valent."
+  },
+  {
+    "q": "Atomic nucleus discovered in",
+    "choices": [
+      "1911",
+      "1897",
+      "1932",
+      "1917"
+    ],
+    "correct": 0,
+    "hint": "Rutherford’s model."
+  },
+  {
+    "q": "Electron discovery year",
+    "choices": [
+      "1897",
+      "1911",
+      "1917",
+      "1932"
+    ],
+    "correct": 0,
+    "hint": "J. J. Thomson era."
+  },
+  {
+    "q": "Neutron discovery year",
+    "choices": [
+      "1932",
+      "1911",
+      "1897",
+      "1905"
+    ],
+    "correct": 0,
+    "hint": "Chadwick."
+  },
+  {
+    "q": "Early rectifiers in radios used",
+    "choices": [
+      "Diode tubes",
+      "Phototubes",
+      "Pentodes",
+      "SCRs"
+    ],
+    "correct": 0,
+    "hint": "One-way current device."
+  },
+  {
+    "q": "Triode best use historically",
+    "choices": [
+      "Amplification",
+      "Rectification",
+      "Light detection",
+      "Voltage regulation"
+    ],
+    "correct": 0,
+    "hint": "Microphones, radios."
+  },
+  {
+    "q": "Pentode advantage vs triode",
+    "choices": [
+      "Higher gain, less noise",
+      "Lower gain, more noise",
+      "Uses no heater",
+      "No vacuum needed"
+    ],
+    "correct": 0,
+    "hint": "Extra grids help."
+  },
+  {
+    "q": "Phototubes respond to",
+    "choices": [
+      "Light",
+      "Sound",
+      "Temperature",
+      "Pressure"
+    ],
+    "correct": 0,
+    "hint": "Photoelectric effect."
+  },
+  {
+    "q": "Gas discharge tube medium",
+    "choices": [
+      "Gas",
+      "Vacuum",
+      "Solid",
+      "Liquid"
+    ],
+    "correct": 0,
+    "hint": "Ionized at voltage."
+  },
+  {
+    "q": "Tubes are ancestors of",
+    "choices": [
+      "Modern electronics",
+      "Hydraulics",
+      "Optics only",
+      "Biology"
+    ],
+    "correct": 0,
+    "hint": "Pre-transistor era."
+  },
+  {
+    "q": "Valence electrons are important for",
+    "choices": [
+      "Electrical conduction",
+      "Nuclear binding",
+      "Gravitational pull",
+      "Thermal expansion only"
+    ],
+    "correct": 0,
+    "hint": "Outer shell activity."
+  },
+  {
+    "q": "Conductors example in slides",
+    "choices": [
+      "Copper",
+      "Wood",
+      "Glass",
+      "Air"
+    ],
+    "correct": 0,
+    "hint": "Metal wiring."
+  },
+  {
+    "q": "Insulators example in slides",
+    "choices": [
+      "Rubber",
+      "Copper",
+      "Aluminum",
+      "Iron"
+    ],
+    "correct": 0,
+    "hint": "Protective coating."
+  },
+  {
+    "q": "Semiconductors listed include",
+    "choices": [
+      "Silicon, Germanium",
+      "Copper, Aluminum",
+      "Rubber, Glass",
+      "Air, Vacuum"
+    ],
+    "correct": 0,
+    "hint": "Group IV elements."
+  },
+  {
+    "q": "Atoms are the",
+    "choices": [
+      "Building blocks of matter",
+      "Smallest particles",
+      "Same as molecules",
+      "Charged carriers only"
+    ],
+    "correct": 0,
+    "hint": "Retain element properties."
+  },
+  {
+    "q": "Charge neutrality means",
+    "choices": [
+      "Protons = electrons",
+      "Neutrons = electrons",
+      "Protons = neutrons always",
+      "Electrons = neutrons"
+    ],
+    "correct": 0,
+    "hint": "Balanced charges."
+  },
+  {
+    "q": "Isotopes differ by",
+    "choices": [
+      "Neutrons count",
+      "Protons count",
+      "Electron charge",
+      "Valence only"
+    ],
+    "correct": 0,
+    "hint": "Same element, different mass."
+  },
+  {
+    "q": "Early oscilloscopes used",
+    "choices": [
+      "CRTs",
+      "LCDs",
+      "LEDs",
+      "Plasma"
+    ],
+    "correct": 0,
+    "hint": "Green phosphor glow."
+  },
+  {
+    "q": "Neon signage uses",
+    "choices": [
+      "Gas discharge tubes",
+      "Phototubes",
+      "Triodes",
+      "SCRs"
+    ],
+    "correct": 0,
+    "hint": "Ionized gas light."
+  },
+  {
+    "q": "Surge protectors can use",
+    "choices": [
+      "Gas discharge tubes",
+      "Photodiodes",
+      "Triodes",
+      "Varistors only"
+    ],
+    "correct": 0,
+    "hint": "Clamps high voltage."
+  },
+  {
+    "q": "Transistors are made from",
+    "choices": [
+      "Semiconductors",
+      "Insulators",
+      "Conductors only",
+      "Vacuum"
+    ],
+    "correct": 0,
+    "hint": "Si, Ge base."
+  },
+  {
+    "q": "Microchips are built on",
+    "choices": [
+      "Silicon",
+      "Glass",
+      "Rubber",
+      "Copper"
+    ],
+    "correct": 0,
+    "hint": "Wafer substrate."
+  },
+  {
+    "q": "Which tube detects light?",
+    "choices": [
+      "Phototube",
+      "Triode",
+      "Pentode",
+      "Diode tube"
+    ],
+    "correct": 0,
+    "hint": "Photoelectric device."
+  },
+  {
+    "q": "Which device fires electrons at phosphor?",
+    "choices": [
+      "CRT",
+      "LED",
+      "LCD",
+      "Laser"
+    ],
+    "correct": 0,
+    "hint": "Old displays."
+  },
+  {
+    "q": "Which tube has control grid?",
+    "choices": [
+      "Triode",
+      "Diode",
+      "Phototube",
+      "CRT"
+    ],
+    "correct": 0,
+    "hint": "Enables amplification."
+  },
+  {
+    "q": "Which tube is like one-way street?",
+    "choices": [
+      "Diode tube",
+      "Triode",
+      "Pentode",
+      "Phototube"
+    ],
+    "correct": 0,
+    "hint": "Rectifier."
+  },
+  {
+    "q": "Vacuum tube also called",
+    "choices": [
+      "Electron tube",
+      "Light tube",
+      "Photon guide",
+      "Ion lamp"
+    ],
+    "correct": 0,
+    "hint": "Historic term."
+  },
+  {
+    "q": "Tubes control current in",
+    "choices": [
+      "Vacuum or gas",
+      "Liquid",
+      "Wood",
+      "Plasma only"
+    ],
+    "correct": 0,
+    "hint": "Two media mentioned."
+  },
+  {
+    "q": "Semiconductors allow",
+    "choices": [
+      "Controlled conduction",
+      "Only insulation",
+      "Only perfect conduction",
+      "Only superconductivity"
+    ],
+    "correct": 0,
+    "hint": "Middle behavior."
+  },
+  {
+    "q": "Outer electrons are called",
+    "choices": [
+      "Valence electrons",
+      "Core electrons",
+      "Free neutrons",
+      "Ion cores"
+    ],
+    "correct": 0,
+    "hint": "In the outer shell."
+  },
+  {
+    "q": "Copper typically has",
+    "choices": [
+      "One valence electron",
+      "Four valence electrons",
+      "Seven valence electrons",
+      "No valence electrons"
+    ],
+    "correct": 0,
+    "hint": "Group I-like behavior."
+  },
+  {
+    "q": "Rubber typically has",
+    "choices": [
+      "Seven or eight valence electrons",
+      "One valence electron",
+      "Four valence electrons",
+      "Three valence electrons"
+    ],
+    "correct": 0,
+    "hint": "Very poor conductor."
+  },
+  {
+    "q": "Silicon’s group suggests",
+    "choices": [
+      "Four bonds",
+      "One bond",
+      "Eight bonds",
+      "No bonds"
+    ],
+    "correct": 0,
+    "hint": "Tetrahedral networks."
+  },
+  {
+    "q": "Rutherford model emphasized",
+    "choices": [
+      "Nuclear center",
+      "Uniform pudding",
+      "String theory",
+      "Quantum fields"
+    ],
+    "correct": 0,
+    "hint": "1911 discovery."
+  },
+  {
+    "q": "Thomson is tied to",
+    "choices": [
+      "Electron discovery",
+      "Neutron discovery",
+      "Proton discovery",
+      "Quantum mechanics"
+    ],
+    "correct": 0,
+    "hint": "Cathode rays."
+  },
+  {
+    "q": "Chadwick is tied to",
+    "choices": [
+      "Neutron discovery",
+      "Electron discovery",
+      "Proton discovery",
+      "Relativity"
+    ],
+    "correct": 0,
+    "hint": "1932 result."
+  },
+  {
+    "q": "Transistors replaced tubes because",
+    "choices": [
+      "Less heat and power",
+      "More glass",
+      "More size",
+      "More heaters"
+    ],
+    "correct": 0,
+    "hint": "Efficiency benefit."
+  },
+  {
+    "q": "CRT still found in",
+    "choices": [
+      "Some oscilloscopes",
+      "Modern phones",
+      "OLED TVs",
+      "Quantum dots only"
+    ],
+    "correct": 0,
+    "hint": "Specialized gear."
+  },
+  {
+    "q": "Phototube former use",
+    "choices": [
+      "Light meters",
+      "Power inverters",
+      "Motors",
+      "Batteries"
+    ],
+    "correct": 0,
+    "hint": "Old cameras."
+  },
+  {
+    "q": "Gas discharge clamps",
+    "choices": [
+      "Overvoltage",
+      "Overcurrent only",
+      "Frequency",
+      "Temperature"
+    ],
+    "correct": 0,
+    "hint": "Surge protection."
+  },
+  {
+    "q": "Valence importance in",
+    "choices": [
+      "Bonding and conduction",
+      "Gravity",
+      "Radioactivity",
+      "Elasticity"
+    ],
+    "correct": 0,
+    "hint": "Core of materials."
+  },
+  {
+    "q": "Semiconductors are",
+    "choices": [
+      "Between conductors and insulators",
+      "Better than both",
+      "Worse than both",
+      "Same as insulators"
+    ],
+    "correct": 0,
+    "hint": "Intermediate behavior."
+  },
+  {
+    "q": "Microchip birth came from",
+    "choices": [
+      "Integrating many transistors",
+      "Integrating many tubes",
+      "Stringing batteries",
+      "Stacking capacitors"
+    ],
+    "correct": 0,
+    "hint": "On silicon die."
+  },
+  {
+    "q": "Device smaller than tube that replaced it",
+    "choices": [
+      "Transistor",
+      "Relay",
+      "SCR",
+      "Varistor"
+    ],
+    "correct": 0,
+    "hint": "Solid-state."
+  },
+  {
+    "q": "Valence shell term refers to",
+    "choices": [
+      "Outermost electron shell",
+      "Innermost nucleus",
+      "Proton cloud",
+      "Photon field"
+    ],
+    "correct": 0,
+    "hint": "Chemistry term."
+  },
+  {
+    "q": "Electrons are",
+    "choices": [
+      "Negative charge carriers",
+      "Positive carriers",
+      "Neutral carriers",
+      "Ions"
+    ],
+    "correct": 0,
+    "hint": "Flow in metals."
+  },
+  {
+    "q": "Protons are located in",
+    "choices": [
+      "Nucleus",
+      "Outer shell",
+      "Conduction band",
+      "Vacuum"
+    ],
+    "correct": 0,
+    "hint": "Center of atom."
+  },
+  {
+    "q": "Neutrons are located in",
+    "choices": [
+      "Nucleus",
+      "Outer shell",
+      "Valence ring",
+      "Electron cloud"
+    ],
+    "correct": 0,
+    "hint": "Neutral core."
+  },
+  {
+    "q": "Charge of proton equals",
+    "choices": [
+      "Magnitude of electron",
+      "Twice electron",
+      "Half electron",
+      "Zero"
+    ],
+    "correct": 0,
+    "hint": "Opposite sign."
+  },
+  {
+    "q": "Rectifier function is to",
+    "choices": [
+      "Convert AC to DC",
+      "Convert DC to AC",
+      "Amplify",
+      "Store energy"
+    ],
+    "correct": 0,
+    "hint": "One-way current action."
+  },
+  {
+    "q": "Amplifier function is to",
+    "choices": [
+      "Increase signal amplitude",
+      "Block signals",
+      "Rectify AC",
+      "Detect light"
+    ],
+    "correct": 0,
+    "hint": "Triode did this early."
+  },
+  {
+    "q": "Early TV transmitters used",
+    "choices": [
+      "Tetrodes/Pentodes",
+      "Diode tubes",
+      "Phototubes",
+      "CRTs"
+    ],
+    "correct": 0,
+    "hint": "Extra grids helped power stages."
+  },
+  {
+    "q": "Which device detects light but not amplify",
+    "choices": [
+      "Phototube",
+      "Triode",
+      "Op-amp",
+      "Thermistor"
+    ],
+    "correct": 0,
+    "hint": "Simple photoemission."
+  },
+  {
+    "q": "Which statement matches conductors?",
+    "choices": [
+      "Many free electrons",
+      "Few free electrons",
+      "Band gap is huge",
+      "No electrons"
+    ],
+    "correct": 0,
+    "hint": "Good carriers."
+  },
+  {
+    "q": "Which statement matches insulators?",
+    "choices": [
+      "Electrons tightly bound",
+      "Many free electrons",
+      "Easily conduct",
+      "No atoms"
+    ],
+    "correct": 0,
+    "hint": "Hard to move charges."
+  },
+  {
+    "q": "Which statement matches semiconductors?",
+    "choices": [
+      "Conductivity can be controlled",
+      "Always conduct well",
+      "Never conduct",
+      "Only work cold"
+    ],
+    "correct": 0,
+    "hint": "Doping, temperature matter."
+  },
+  {
+    "q": "Atomic building block keeps",
+    "choices": [
+      "Element’s properties",
+      "Molecule’s properties",
+      "Mixture’s properties",
+      "No properties"
+    ],
+    "correct": 0,
+    "hint": "Definition slide."
+  },
+  {
+    "q": "Which slide example is a conductor?",
+    "choices": [
+      "Copper wire",
+      "Glass rod",
+      "Rubber band",
+      "Dry wood"
+    ],
+    "correct": 0,
+    "hint": "Metallic bonding."
+  },
+  {
+    "q": "Which slide example is an insulator?",
+    "choices": [
+      "Rubber",
+      "Copper",
+      "Aluminum",
+      "Iron"
+    ],
+    "correct": 0,
+    "hint": "Cable jackets."
+  },
+  {
+    "q": "Tubes control flow via",
+    "choices": [
+      "Electrodes in vacuum/gas",
+      "Magnets in liquid",
+      "Belts and pulleys",
+      "Heat alone"
+    ],
+    "correct": 0,
+    "hint": "Cathode, anode, grids."
+  },
+  {
+    "q": "Modern electronics core is",
+    "choices": [
+      "Semiconductors",
+      "Vacuum tubes",
+      "Gears",
+      "Springs"
+    ],
+    "correct": 0,
+    "hint": "Solid-state devices."
+  },
+  {
+    "q": "Microchips pack",
+    "choices": [
+      "Millions to billions of devices",
+      "Tens of tubes",
+      "Only resistors",
+      "Only capacitors"
+    ],
+    "correct": 0,
+    "hint": "IC era."
+  },
+  {
+    "q": "Electron cloud contains",
+    "choices": [
+      "Orbiting electrons",
+      "Protons",
+      "Neutrons",
+      "Ions only"
+    ],
+    "correct": 0,
+    "hint": "Outside nucleus."
+  },
+  {
+    "q": "An atom with more electrons than protons",
+    "choices": [
+      "Anion",
+      "Cation",
+      "Isotope",
+      "Element change"
+    ],
+    "correct": 0,
+    "hint": "Net negative charge."
+  },
+  {
+    "q": "An atom with fewer electrons than protons",
+    "choices": [
+      "Cation",
+      "Anion",
+      "Isotope",
+      "Neutral atom"
+    ],
+    "correct": 0,
+    "hint": "Net positive charge."
+  },
+  {
+    "q": "One role of valence electrons",
+    "choices": [
+      "Determine chemical reactivity",
+      "Change proton mass",
+      "Set nuclear size",
+      "Create photons only"
+    ],
+    "correct": 0,
+    "hint": "Reactions and bonding."
+  },
+  {
+    "q": "Conduction in metals mainly via",
+    "choices": [
+      "Electrons",
+      "Protons",
+      "Neutrons",
+      "Ions"
+    ],
+    "correct": 0,
+    "hint": "Sea of electrons."
+  },
+  {
+    "q": "Insulators used for",
+    "choices": [
+      "Preventing current flow",
+      "Enhancing current flow",
+      "Generating electrons",
+      "Detecting light"
+    ],
+    "correct": 0,
+    "hint": "Safety and isolation."
+  },
+  {
+    "q": "Semiconductors used for",
+    "choices": [
+      "Diodes and transistors",
+      "Batteries and motors",
+      "Resistors only",
+      "Transformers only"
+    ],
+    "correct": 0,
+    "hint": "Core components."
+  },
+  {
+    "q": "First microchips formed by",
+    "choices": [
+      "Putting many transistors on silicon",
+      "Stacking tubes in glass",
+      "Filling gas tubes",
+      "Using only resistors"
+    ],
+    "correct": 0,
+    "hint": "Integration step."
+  },
+  {
+    "q": "Diode tube acts as",
+    "choices": [
+      "One-way valve",
+      "Two-way switch",
+      "Amplifier",
+      "Light source"
+    ],
+    "correct": 0,
+    "hint": "Rectifies."
+  },
+  {
+    "q": "Triode includes",
+    "choices": [
+      "Control grid",
+      "Solar cell",
+      "Photocathode only",
+      "Gas fill only"
+    ],
+    "correct": 0,
+    "hint": "Three electrodes."
+  },
+  {
+    "q": "CRT image created by",
+    "choices": [
+      "Electron beam on phosphor",
+      "LED array",
+      "Liquid crystals",
+      "Laser scanning mirrors"
+    ],
+    "correct": 0,
+    "hint": "Phosphor glow."
+  },
+  {
+    "q": "Neon glow produced by",
+    "choices": [
+      "Gas discharge",
+      "Electron holes",
+      "Nuclear decay",
+      "Elastic collisions only"
+    ],
+    "correct": 0,
+    "hint": "Ionized gas emission."
+  },
+  {
+    "q": "Surge protection role is to",
+    "choices": [
+      "Clamp high voltages",
+      "Amplify signals",
+      "Store energy long term",
+      "Detect light"
+    ],
+    "correct": 0,
+    "hint": "Protect equipment."
+  },
+  {
+    "q": "Which pair names a semiconductor?",
+    "choices": [
+      "Silicon, Germanium",
+      "Rubber, Glass",
+      "Copper, Iron",
+      "Air, Water"
+    ],
+    "correct": 0,
+    "hint": "Periodic table Group IV."
+  },
+  {
+    "q": "In a neutral atom, electrons equal",
+    "choices": [
+      "Protons",
+      "Neutrons",
+      "Protons+neutrons",
+      "Zero"
+    ],
+    "correct": 0,
+    "hint": "Neutral charge."
+  },
+  {
+    "q": "Isotope example changes",
+    "choices": [
+      "Neutron count",
+      "Proton count",
+      "Charge sign",
+      "Valence only"
+    ],
+    "correct": 0,
+    "hint": "Mass changes."
+  },
+  {
+    "q": "Electron discovery used",
+    "choices": [
+      "Cathode rays",
+      "Alpha scattering",
+      "Neutron beams",
+      "Gamma rays"
+    ],
+    "correct": 0,
+    "hint": "JJ Thomson setup."
+  }
+]
+    const $ = sel => document.querySelector(sel);
+    const progressEl = $("#progress");
+    const barEl = $("#bar");
+    const scoreEl = $("#score");
+    const qEl = $("#question");
+    const listEl = $("#choices");
+    const hintBtn = $("#hintBtn");
+    const hintText = $("#hintText");
+    const nextBtn = $("#nextBtn");
+    const reviewBtn = $("#reviewBtn");
+    const restartBtn = $("#restartBtn");
+
+    const KEY = "flashcards-electronics-demo-v1";
+    const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+
+    let CARDS = [];
+    let order = saved.order || shuffle([...Array(DEFAULT_CARDS.length).keys()]);
+    let idx = clamp(saved.idx ?? 0, 0, order.length - 1);
+    let score = saved.score ?? 0;
+    let best = saved.best ?? 0;
+    let wrongBank = saved.wrongBank || [];
+    let reviewMode = saved.reviewMode || false;
+
+    function persist(){ localStorage.setItem(KEY, JSON.stringify({ order, idx, score, best, wrongBank, reviewMode })); }
+    function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+    function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
+
+    async function loadCards(){
+      try {
+        const resp = await fetch("cards.json", {cache:"no-store"});
+        if(!resp.ok) throw new Error("no cards.json");
+        const data = await resp.json();
+        if(Array.isArray(data) && data.length){ CARDS = data; }
+      } catch(e){ CARDS = DEFAULT_CARDS; }
+      // If we loaded larger deck, resize order and idx safely
+      order = saved.order && saved.order.length === CARDS.length ? saved.order : shuffle([...Array(CARDS.length).keys()]);
+      idx = clamp(saved.idx ?? 0, 0, order.length - 1);
+      render();
+    }
+
+    function render(){
+      const seq = reviewMode ? wrongBank : order;
+      const total = seq.length || 1;
+      const cardIndex = seq.length ? seq[idx % seq.length] : order[0];
+      const card = CARDS[cardIndex];
+
+      progressEl.textContent = `Q ${Math.min(idx+1, total)} / ${total}`;
+      barEl.style.width = `${((idx)/Math.max(total-1,1))*100}%`;
+      scoreEl.textContent = `Score: ${score}${best ? ` (Best: ${best})` : ""}`;
+      qEl.textContent = card.q;
+
+      listEl.innerHTML = "";
+      hintText.hidden = true;
+      hintText.textContent = card.hint || "No hint for this card.";
+
+      card.choices.forEach((c, i) => {
+        const li = document.createElement("li");
+        li.className = "choice";
+        li.setAttribute("role", "option");
+        li.tabIndex = 0;
+        li.dataset.index = i;
+        li.innerHTML = `<span class="index">${i+1}.</span> ${c}`;
+        li.addEventListener("click", () => check(i, cardIndex));
+        li.addEventListener("keydown", (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); check(i, cardIndex);} });
+        listEl.appendChild(li);
+      });
+
+      nextBtn.disabled = true;
+      persist();
+    }
+
+    function check(choice, cardIndex){
+      if([...listEl.children].some(li => li.classList.contains("correct")||li.classList.contains("incorrect"))) return;
+      const card = CARDS[cardIndex];
+      [...listEl.children].forEach((li, i) => {
+        li.classList.toggle("correct", i === card.correct);
+        if(i===choice && choice!==card.correct) li.classList.add("incorrect");
+      });
+      if(choice===card.correct){ score++; } else { if(!wrongBank.includes(cardIndex)) wrongBank.push(cardIndex); }
+      if(score>best) best = score;
+      nextBtn.disabled = false;
+      persist();
+    }
+
+    function next(){
+      const seq = reviewMode ? wrongBank : order;
+      if(seq.length===0) return;
+      idx++;
+      if(idx >= seq.length){ idx = 0; if(reviewMode) shuffle(wrongBank); else shuffle(order); }
+      render();
+    }
+
+    function restart(){ order = shuffle([...Array(CARDS.length).keys()]); idx=0; score=0; wrongBank=[]; reviewMode=false; render(); }
+
+    function toggleReview(){
+      if(wrongBank.length===0){ alert("No wrong answers yet to review. Keep practicing!"); return; }
+      reviewMode = !reviewMode; idx=0; score=0; render();
+      reviewBtn.textContent = reviewMode ? "Exit review (R)" : "Review wrong (R)";
+    }
+
+    hintBtn.addEventListener("click", ()=>{ const open = hintText.hidden; hintText.hidden = !open; hintBtn.setAttribute("aria-expanded", String(open)); hintBtn.textContent = open ? "Hide hint (H)" : "Show hint (H)"; });
+    nextBtn.addEventListener("click", next);
+    restartBtn.addEventListener("click", restart);
+    reviewBtn.addEventListener("click", toggleReview);
+
+    window.addEventListener("keydown", (e)=>{
+      if(e.key>="1" && e.key<="4"){ const i = Number(e.key)-1; const seq = reviewMode ? wrongBank : order; const cardIndex = seq.length ? seq[idx % seq.length] : order[0]; check(i, cardIndex); }
+      if(e.key.toLowerCase()==="h") hintBtn.click();
+      if(e.key.toLowerCase()==="n") nextBtn.click();
+      if(e.key.toLowerCase()==="r") reviewBtn.click();
+    });
+
+    loadCards();
+  </script>
 </body>
 </html>
